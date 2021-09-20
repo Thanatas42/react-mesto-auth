@@ -1,0 +1,26 @@
+.card__like-button {
+  -ms-flex-item-align: center;
+  -ms-grid-row-align: center;
+  align-self: center;
+  cursor: pointer;
+  -webkit-transition: .15s;
+  -o-transition: .15s;
+  transition: .15s;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  background: url(../../../images/logo/vector-like.svg) no-repeat center;
+  background-size: 22px 19px;
+  width: 22px;
+  height: 19px;
+  border: none;
+}
+
+.card__like-button:hover {
+  opacity: .5;
+}
+
+.card__like-button:focus {
+  border: none;
+}

@@ -1,0 +1,27 @@
+.profile {
+  font-family: 'Inter', Arial, sans-serif;
+  margin: auto;
+  padding: 42px 10px 36px;
+  max-width: calc(100% - 38px);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+@media screen and (min-width: 880px) {
+  .profile {
+    padding: 40px 10px 51px;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: row;
+    flex-direction: row;
+    max-width: 880px;
+  }
+}

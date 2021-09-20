@@ -1,0 +1,33 @@
+.profile__add-button {
+  width: 282px;
+  max-width: 100%;
+  /* очень крутая резиновая верстка при таком комбинировании */
+  height: 50px;
+  cursor: pointer;
+  -webkit-transition: .15s;
+  -o-transition: .15s;
+  transition: .15s;
+  border: 2px solid #FFFFFF;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  background: url(../../../images/logo/profile__add-button.svg) no-repeat center;
+  background-size: 16px 16px;
+}
+
+.profile__add-button:hover {
+  -webkit-transition: .3s;
+  -o-transition: .3s;
+  transition: .3s;
+  opacity: .6;
+}
+
+@media screen and (min-width: 880px) {
+  .profile__add-button {
+    margin-left: auto;
+    width: 150px;
+    height: 50px;
+    background-size: 22px 22px;
+  }
+}

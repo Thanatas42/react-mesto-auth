@@ -1,0 +1,13 @@
+.card__like-button_theme_active {
+  background: url(../../../../images/logo/like_active.svg) no-repeat center;
+  background-size: 22px 19px;
+  width: 22px;
+  height: 19px;
+  border: none;
+}
+
+.card__like-button_theme_active,
+.card__like-button_theme_active:active,
+.card__like-button_theme_active:focus {
+    outline: none;
+}

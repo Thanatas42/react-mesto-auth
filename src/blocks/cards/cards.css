@@ -1,0 +1,29 @@
+.cards {
+  margin: auto;
+  -webkit-margin-before: 0;
+  margin-block-start: 0;
+  -webkit-margin-after: 0;
+  margin-block-end: 0;
+  display: -ms-grid;
+  display: grid;
+  padding: 0 19px 0;
+  grid-auto-columns: 1fr;
+  gap: 20px;
+}
+
+@media screen and (min-width: 450px) {
+  .cards {
+    -ms-grid-columns: 1fr 17px 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px 17px;
+  }
+}
+
+@media screen and (min-width: 880px) {
+  .cards {
+    max-width: 880px;
+    -ms-grid-columns: 1fr 17px 1fr 17px 1fr;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px 17px;
+  }
+}

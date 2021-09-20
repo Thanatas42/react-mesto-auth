@@ -1,0 +1,15 @@
+.popup_opened {
+  visibility: visible;
+  animation-name: move;
+  animation-duration: .5s;
+  animation-fill-mode: forwards;
+}
+
+@keyframes move {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
