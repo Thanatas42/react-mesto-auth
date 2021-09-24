@@ -7,7 +7,7 @@ function Header(props) {
         <header className="header">
             <a href="#top" target="_self"><img className="header__logo" src={logo}
                 alt="Проект Место" /></a>
-            <Link className="header__title auth__link" to="/sign-up">Регистрация</Link>
+            {props.children}
         </header>
     );
 };

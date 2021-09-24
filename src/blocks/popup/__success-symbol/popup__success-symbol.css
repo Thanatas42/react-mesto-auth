@@ -1,0 +1,5 @@
+.popup__success-symbol {
+    display: flex;
+    justify-self: center;
+    margin: 0 auto 15px;
+}

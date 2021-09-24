@@ -1,5 +1,6 @@
 import React from 'react';
-import { Route, Link, Redirect, Switch } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { Route, Link, Redirect, Switch, useHistory, useLocation } from 'react-router-dom';
 import Header from './Header.js';
 import Main from './Main.js';
 import Footer from './Footer.js';
@@ -11,8 +12,10 @@ import EditAvatarPopup from './EditAvatarPopup.js';
 import AddPlacePopup from './AddPlacePopup.js';
 import { CurrentUserContext, CurrentUser } from '../contexts/CurrentUserContext';
 import { CardsArrayContex, CardsArray } from '../contexts/CardsArrayContex';
-import AuthorizationPopup from './AuthorizationPopup';
+import * as Auth from '../Auth';
 import ProtectedRoute from "./ProtectedRoute";
+import Register from "./Register";
+import Login from './Login.js';
 
 function App() {
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = React.useState(false);
@@ -21,6 +24,36 @@ function App() {
   const [isImagePopupOpen, setIsImagePopupOpen] = React.useState(false);
   const [selectedCard, selectCard] = React.useState({});
   const [loggedIn, setLoggedIn] = React.useState(false);
+
+  const history = useHistory();
+  const [email, setEmail] = useState("");
+  const auth = (jwt) => {
+    return Auth.getContent(jwt).then((res) => {
+      if (res) {
+        setLoggedIn(true);
+        setEmail(res.data.email);
+      }
+    });
+  };
+
+  useEffect(() => {
+    const jwt = localStorage.getItem("jwt");
+
+    if (jwt) {
+      auth(jwt);
+    }
+  }, [loggedIn]);
+
+  useEffect(() => {
+    if (loggedIn) history.push("/main");
+  }, [loggedIn]);
+
+
+  const onSignOut = () => {
+    localStorage.removeItem("jwt");
+    setLoggedIn(false);
+    history.push("/sign-in");
+  };
 
   function handleEditProfileClick() {
     setIsEditProfilePopupOpen(true);
@@ -47,6 +80,7 @@ function App() {
   const [cards, setCards] = React.useState(CardsArray);
 
   React.useEffect(() => {
+
     Promise.all([api.getUserData(), api.getInitialCards()])
       .then(([userData, initialCards]) => {
         setUserInfo({
@@ -137,24 +171,59 @@ function App() {
       });
   };
 
+  const location = useLocation();
+
+  function headerTittle() {
+    switch (location.pathname) {
+      case '/main':
+        return (
+          <div className='header__auth'>
+            <p className='header__title' style={{ paddingRight: '24px' }}>{email}</p>
+            <Link className="header__title auth__link" to="/sign-up" onClick={onSignOut}>Выйти</Link>
+          </div>
+        )
+
+      case '/sign-in':
+        return (
+          <div className='header__auth'>
+            <Link className="header__title auth__link" to="/sign-up">Регистрация</Link>
+          </div>
+        )
+
+      case '/sign-up':
+        return (
+          <div className='header__auth'>
+            <Link className="header__title auth__link" to="/sign-in">Войти</Link>
+          </div>
+        )
+
+      default:
+        break;
+    }
+  }
+
+
+
   return ((
     <div className="App body">
       <CurrentUserContext.Provider value={userInfo}>
         <CardsArrayContex.Provider value={cards}>
-          <Header />
+          <Header>
+            {headerTittle()}
+          </Header>
           <Switch>
             <ProtectedRoute
               path="/main"
               loggedIn={loggedIn}
               component={Main} onEditProfile={handleEditProfileClick} isAddPlacePopupOpen={handleAddPlaceClick} onEditAvatar={handleEditAvatarClick}
-              onCardClick={handleCardClick} card={selectedCard} onCardLike={handleCardLike} onCardDelete={handleCardDelete} />
+              onCardClick={handleCardClick} card={selectedCard} onCardLike={handleCardLike} onCardDelete={handleCardDelete} onSignOut={onSignOut} />
             <Route path="/sign-up">
-              <AuthorizationPopup title="Регистрация" confirm="Зарегистрироваться">
+              <Register>
                 <p className="auth__span">Уже зарегистрированы? <Link className="auth__span auth__link" to="/sign-in">Войти</Link></p>
-              </AuthorizationPopup>
+              </Register>
             </Route>
             <Route path="/sign-in">
-              <AuthorizationPopup title="Вход" confirm="Войти" />
+              <Login loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
             </Route>
             <Route>
               {loggedIn ? (
@@ -164,7 +233,7 @@ function App() {
               )}
             </Route>
           </Switch>
-          
+
           <ImagePopup card={selectedCard} isOpen={isImagePopupOpen} closeAllPopups={closeAllPopups} />
           <EditProfilePopup isOpen={isEditProfilePopupOpen} onClose={closeAllPopups} onUpdateUser={handleUpdateUser} />
           <EditAvatarPopup isOpen={isEditAvatarPopupOpen} onClose={closeAllPopups} onUpdateAvatar={handleUpdateavatar} />
