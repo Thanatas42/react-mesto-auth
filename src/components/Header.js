@@ -1,5 +1,4 @@
 import logo from '../images/logo/header__logo.svg';
-import { Link } from 'react-router-dom';
 
 function Header(props) {
     

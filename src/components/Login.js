@@ -1,36 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import * as Auth from '../Auth';
 
-const Login = (props) => {
+const Login = ({ onLog, ...props }) => {
     const [emailInput, setEmailInput] = React.useState('');
     const [passwordInput, setpasswordInput] = React.useState('');
     const history = useHistory();
-    const [isOpen, setIsOpen] = useState(false);
 
     function handleChangeEmailInput(e) {
-        console.log(emailInput)
         setEmailInput(e.target.value);
     }
     function handleChangePasswordInput(e) {
-        console.log(passwordInput)
         setpasswordInput(e.target.value);
     }
 
     const resetForm = () => {
         setEmailInput('');
         setpasswordInput('');
-    };
-
-    const onLog = ({ passwordInput, emailInput }) => {
-        return Auth.authorize(passwordInput, emailInput).then((res) => {
-            if (!res || !res.token)
-                throw new Error("Неправильные имя пользователя или пароль");
-            if (res.token) {
-                props.setLoggedIn(true);
-                localStorage.setItem("jwt", res.token);
-            }
-        });
     };
 
     function handleSubmit(e) {
@@ -47,10 +32,12 @@ const Login = (props) => {
     };
 
     useEffect(() => {
-        if (localStorage.getItem("jwt")) {
-            history.push("/main");
+        return () => {
+            if (localStorage.getItem("jwt")) {
+                history.push("/main");
+            }
         }
-    }, []);
+    }, [history]);
 
     return (
         <>

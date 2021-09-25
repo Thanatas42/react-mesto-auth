@@ -12,16 +12,21 @@ import EditAvatarPopup from './EditAvatarPopup.js';
 import AddPlacePopup from './AddPlacePopup.js';
 import { CurrentUserContext, CurrentUser } from '../contexts/CurrentUserContext';
 import { CardsArrayContex, CardsArray } from '../contexts/CardsArrayContex';
-import * as Auth from '../Auth';
+import * as Auth from '../utils/Auth';
 import ProtectedRoute from "./ProtectedRoute";
 import Register from "./Register";
 import Login from './Login.js';
+
+import InfoToolTip from './InfoToolTip';
+
 
 function App() {
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = React.useState(false);
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = React.useState(false);
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = React.useState(false);
   const [isImagePopupOpen, setIsImagePopupOpen] = React.useState(false);
+  const [isInfoToolTipOpen, setIsInfoToolTipOpen] = React.useState(false);
+
   const [selectedCard, selectCard] = React.useState({});
   const [loggedIn, setLoggedIn] = React.useState(false);
 
@@ -46,8 +51,27 @@ function App() {
 
   useEffect(() => {
     if (loggedIn) history.push("/main");
-  }, [loggedIn]);
+  }, [loggedIn, history]);
 
+  const onReg = ({ passwordInput, emailInput }) => {
+    return Auth.register(passwordInput, emailInput).then((res) => {
+      if (!res || res.statusCode === 400) {
+        throw new Error("Что-то пошло не так");
+      } else
+        return res;
+    });
+  };
+
+  const onLog = ({ passwordInput, emailInput }) => {
+    return Auth.authorize(passwordInput, emailInput).then((res) => {
+      if (!res || !res.token)
+        throw new Error("Неправильные имя пользователя или пароль");
+      if (res.token) {
+        setLoggedIn(true);
+        localStorage.setItem("jwt", res.token);
+      }
+    });
+  };
 
   const onSignOut = () => {
     localStorage.removeItem("jwt");
@@ -74,10 +98,12 @@ function App() {
     setIsAddPlacePopupOpen(false);
     setIsEditProfilePopupOpen(false);
     setIsImagePopupOpen(false);
+    setIsInfoToolTipOpen(false);
   };
 
   const [userInfo, setUserInfo] = React.useState(CurrentUser);
   const [cards, setCards] = React.useState(CardsArray);
+  const [resStatus, setResStatus] = React.useState(false);
 
   React.useEffect(() => {
 
@@ -218,12 +244,12 @@ function App() {
               component={Main} onEditProfile={handleEditProfileClick} isAddPlacePopupOpen={handleAddPlaceClick} onEditAvatar={handleEditAvatarClick}
               onCardClick={handleCardClick} card={selectedCard} onCardLike={handleCardLike} onCardDelete={handleCardDelete} onSignOut={onSignOut} />
             <Route path="/sign-up">
-              <Register>
-                <p className="auth__span">Уже зарегистрированы? <Link className="auth__span auth__link" to="/sign-in">Войти</Link></p>
+              <Register onReg={onReg} onInfoTool={setIsInfoToolTipOpen} setResStatus={setResStatus}>
+                <p className="auth__span">Уже зарегистрированы?<Link className="auth__span auth__link" to="/sign-in">Войти</Link></p>
               </Register>
             </Route>
             <Route path="/sign-in">
-              <Login loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
+              <Login loggedIn={loggedIn} setLoggedIn={setLoggedIn} onLog={onLog} />
             </Route>
             <Route>
               {loggedIn ? (
@@ -239,6 +265,7 @@ function App() {
           <EditAvatarPopup isOpen={isEditAvatarPopupOpen} onClose={closeAllPopups} onUpdateAvatar={handleUpdateavatar} />
           <AddPlacePopup isOpen={isAddPlacePopupOpen} onClose={closeAllPopups} onAddPlace={handleAddPlace} />
           <PopupWithForm name="sure" title="Вы&nbsp;уверены?" buttonName="Да" isOpen={false} />
+          <InfoToolTip isOpen={isInfoToolTipOpen} closeAllPopups={closeAllPopups} resStatus={resStatus} />
 
           <Footer />
         </CardsArrayContex.Provider>
