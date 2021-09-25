@@ -38,7 +38,10 @@ function App() {
         setLoggedIn(true);
         setEmail(res.data.email);
       }
-    });
+    })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   useEffect(() => {
@@ -59,7 +62,10 @@ function App() {
         throw new Error("Что-то пошло не так");
       } else
         return res;
-    });
+    })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   const onLog = ({ passwordInput, emailInput }) => {
@@ -70,7 +76,10 @@ function App() {
         setLoggedIn(true);
         localStorage.setItem("jwt", res.token);
       }
-    });
+    })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   const onSignOut = () => {
