@@ -63,9 +63,6 @@ function App() {
       } else
         return res;
     })
-      .catch((err) => {
-        console.log(err);
-      });
   };
 
   const onLog = ({ passwordInput, emailInput }) => {
