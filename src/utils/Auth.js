@@ -1,5 +1,5 @@
-export const BASE_URL = "https://auth.nomoreparties.co";
-
+export const BASE_URL = "https://api.dmitry-mesto.students.nomoredomains.work";
+// https://api.dmitry-mesto.students.nomoredomains.work
 const resStatus = (res) => {
     if (!res.ok) {
         return Promise.reject(`Error: ${res.status}`);

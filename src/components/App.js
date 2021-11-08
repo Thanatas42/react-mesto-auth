@@ -5,12 +5,12 @@ import Header from './Header.js';
 import Main from './Main.js';
 import Footer from './Footer.js';
 import PopupWithForm from "./PopupWithForm.js";
-import api from "../utils/Api.js";
+import createApi from "../utils/Api.js";
 import ImagePopup from "./ImagePopup";
 import EditProfilePopup from './EditProfilePopup.js';
 import EditAvatarPopup from './EditAvatarPopup.js';
 import AddPlacePopup from './AddPlacePopup.js';
-import { CurrentUserContext, CurrentUser } from '../contexts/CurrentUserContext';
+import { CurrentUserContext } from '../contexts/CurrentUserContext';
 import { CardsArrayContex, CardsArray } from '../contexts/CardsArrayContex';
 import * as Auth from '../utils/Auth';
 import ProtectedRoute from "./ProtectedRoute";
@@ -32,13 +32,17 @@ function App() {
 
   const history = useHistory();
   const [email, setEmail] = useState("");
+  const [api, setApi] = useState(null);
+
   const auth = (jwt) => {
-    return Auth.getContent(jwt).then((res) => {
-      if (res) {
-        setLoggedIn(true);
-        setEmail(res.data.email);
-      }
-    })
+    Auth.getContent(jwt)
+      .then((res) => {
+        if (res) {
+          setLoggedIn(true);
+          setEmail(res.data.email);
+          setApi(createApi(jwt));
+        }
+      })
       .catch((err) => {
         console.log(err);
       });
@@ -46,23 +50,20 @@ function App() {
 
   useEffect(() => {
     const jwt = localStorage.getItem("jwt");
-
     if (jwt) {
       auth(jwt);
     }
   }, [loggedIn]);
 
   useEffect(() => {
-    if (loggedIn) history.push("/main");
+    if (loggedIn) history.push("/user");
   }, [loggedIn, history]);
 
   const onReg = ({ passwordInput, emailInput }) => {
     return Auth.register(passwordInput, emailInput).then((res) => {
-      if (!res || res.statusCode === 400) {
-        throw new Error("Что-то пошло не так");
-      } else
-        return res;
-    })
+      if (!res) throw new Error("Что-то пошло не так");
+      return res;
+    });
   };
 
   const onLog = ({ passwordInput, emailInput }) => {
@@ -71,6 +72,7 @@ function App() {
         throw new Error("Неправильные имя пользователя или пароль");
       if (res.token) {
         setLoggedIn(true);
+        setApi(createApi(res.token));
         localStorage.setItem("jwt", res.token);
       }
     })
@@ -79,9 +81,11 @@ function App() {
       });
   };
 
+
   const onSignOut = () => {
     localStorage.removeItem("jwt");
     setLoggedIn(false);
+    setApi(null);
     history.push("/sign-in");
   };
 
@@ -107,11 +111,21 @@ function App() {
     setIsInfoToolTipOpen(false);
   };
 
-  const [userInfo, setUserInfo] = React.useState(CurrentUser);
+  const [CurrentUser, setUserInfo] = React.useState({
+    userName: "",
+    userDescription: "",
+    userAvatar: "",
+    userId: "",
+  });
   const [cards, setCards] = React.useState(CardsArray);
   const [resStatus, setResStatus] = React.useState(false);
 
   React.useEffect(() => {
+    if (!api) {
+      console.log("api is null");
+      return;
+    }
+    console.log("api is not null");
 
     Promise.all([api.getUserData(), api.getInitialCards()])
       .then(([userData, initialCards]) => {
@@ -136,12 +150,12 @@ function App() {
     document.addEventListener('keydown', closeByEscape)
 
     return () => document.removeEventListener('keydown', closeByEscape)
-  }, [])
+  }, [api])
 
 
   function handleCardLike(card) {
-    const isLiked = card.likes.some((i) => i._id === userInfo.userId);
 
+    const isLiked = card.likes.some((i) => i === CurrentUser.userId);
     api.changeLikeCardStatus(card._id, !isLiked).then((newCard) => {
       setCards((cards) => cards.map((c) => (c._id === card._id ? newCard : c)));
     })
@@ -151,17 +165,19 @@ function App() {
   };
 
   function handleCardDelete(card) {
-    api.deleteCard(card._id).then(() => {
-      setCards((cards) => cards.filter((c) => c._id !== card._id));
-    })
+    api.deleteCard(card._id)
+      .then(() => {
+        setCards((cards) => cards.filter((c) => c._id !== card._id));
+      })
       .catch((err) => {
         console.log(err);
       });
-  };
-
+  }
+// Иногда получается странный эффект, карточка удаляется, и выписывается ошибка 404, он его удалил и запрос пошел после этого
   function handleUpdateUser(userData) {
     api.updateUser(userData)
       .then((userData) => {
+        console.log(userData)
         setUserInfo({
           userName: userData.name,
           userDescription: userData.about,
@@ -234,11 +250,9 @@ function App() {
     }
   }
 
-
-
   return ((
     <div className="App body">
-      <CurrentUserContext.Provider value={userInfo}>
+      <CurrentUserContext.Provider value={CurrentUser}>
         <CardsArrayContex.Provider value={cards}>
           <Header>
             {headerTittle()}

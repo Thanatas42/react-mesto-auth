@@ -2,7 +2,13 @@ const handleResponse = (res) => {
   if (!res.ok) {
     return Promise.reject(`Error: ${res.status}`);
   }
-  return res.json();
+  return res.json().then((json) => {
+    if (json.data) {
+      return json.data;
+    } else {
+      return json;
+    }
+  })
 };
 
 class Api {
@@ -22,7 +28,8 @@ class Api {
     const url = `${this._baseUrl}/users/me`;
     return fetch(url, {
       headers: this._headers,
-    }).then(handleResponse);
+    })
+      .then(handleResponse);
   };
 
   createCard(card) {
@@ -40,7 +47,7 @@ class Api {
       headers: this._headers,
       method: "DELETE",
     }).then(handleResponse);
-  };
+  }
 
   updateUser(user) {
     const url = `${this._baseUrl}/users/me`;
@@ -61,7 +68,7 @@ class Api {
   };
 
   addLike(cardId) {
-    const url = `${this._baseUrl}/cards/likes/${cardId}`;
+    const url = `${this._baseUrl}/cards/${cardId}/likes`;
     return fetch(url, {
       method: "PUT",
       headers: this._headers,
@@ -69,7 +76,7 @@ class Api {
   }
 
   removeLike(cardId) {
-    const url = `${this._baseUrl}/cards/likes/${cardId}`;
+    const url = `${this._baseUrl}/cards/${cardId}/likes`;
     return fetch(url, {
       method: "DELETE",
       headers: this._headers,
@@ -81,13 +88,21 @@ class Api {
   }
 };
 
-const api = new Api({
+/*const api = new Api({
   baseUrl: "https://mesto.nomoreparties.co/v1/cohort-26",
   headers: {
     authorization: "c483081b-d4c0-4fb6-bbaf-bcea42b7e896",
     "Content-Type": "application/json",
   },
+});*/
+
+const createApi = (token) => new Api({
+  baseUrl: "https://api.dmitry-mesto.students.nomoredomains.work",
+  headers: {
+    authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
+  },
 });
 
-export default api;
+export default createApi;
 

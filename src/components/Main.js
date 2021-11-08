@@ -9,7 +9,6 @@ import { CardsArrayContex } from '../contexts/CardsArrayContex';
 function Main(props) {
     const currentUser = useContext(CurrentUserContext);
     const cards = useContext(CardsArrayContex);
-
     return ((
         <main className="main">
             <section className="profile">
